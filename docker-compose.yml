@@ -1,0 +1,52 @@
+services:
+  grafana:
+    build:
+      context: ./infra/grafana
+      dockerfile: Dockerfile
+    volumes:
+      - grafana_secrets:/run/secrets
+    ports:
+      - ${GRAFANA_PORT}:${GRAFANA_PORT}
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_SERVER_HTTP_PORT=${GRAFANA_PORT}
+    healthcheck:
+      test: ["CMD", "sh", "-c", "test -f /run/secrets/grafana_token && test -s /run/secrets/grafana_token"]
+      # test -f /run/secrets/grafana_token - Check if the file exists
+      # test -s /run/secrets/grafana_token - Check if the file is not empty
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  redis:
+    build:
+      context: ./infra/redis
+      dockerfile: Dockerfile
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  exchange-connector:
+    build:
+      context: ./services/exchange-connector
+      dockerfile: Dockerfile
+    depends_on:
+      grafana:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - grafana_secrets:/run/secrets
+    environment:
+      - GRAFANA_TOKEN_FILE=/run/secrets/grafana_token
+      - GF_SERVER_HTTP_PORT=${GRAFANA_PORT}
+
+volumes:
+  grafana_secrets:
