@@ -1,25 +1,28 @@
 FROM python:3.13-slim
 
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+ENV PATH="/app/services/exchange-connector/.venv/bin:$PATH" \
+    UV_LINK_MODE=copy \
+    UV_COMPILE_BYTECODE=1
+
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY services/exchange-connector/pyproject.toml \
+     services/exchange-connector/uv.lock \
+     services/exchange-connector/README.md \
+     /app/services/exchange-connector/
 
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+COPY libs/common/pyproject.toml \
+     libs/common/uv.lock \
+     libs/common/README.md \
+     /app/libs/common/
 
-ENV PATH="/root/.local/bin:/app/.venv/bin:$PATH"
+COPY libs/common/src /app/libs/common/src
+COPY services/exchange-connector/src /app/services/exchange-connector/src
 
-COPY pyproject.toml README.md ./
+WORKDIR /app/services/exchange-connector
 
-RUN uv venv /app/.venv && \
-    . /app/.venv/bin/activate && \
-    uv sync
-
-COPY src ./src
-# COPY tests ./tests
-
-ENV PYTHONPATH=/app/src
+RUN uv sync --frozen --no-dev
 
 ENTRYPOINT ["uv", "run", "exchange-connector"]

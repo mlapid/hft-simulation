@@ -1,11 +1,14 @@
-import os
-
 from loguru import logger
+
+from common.settings import Settings
+
+
+settings: Settings = Settings()
 
 
 def main() -> None:
-    token_file = os.getenv('GRAFANA_TOKEN_FILE')
-    with open(token_file, 'r') as f:
-        grafana_token = f.read().strip()
-
-    logger.info(f"Grafana token: {grafana_token}")
+    logger.info(f'Grafana host: {settings.grafana_host}')
+    logger.info(f'Grafana port: {settings.grafana_port}')
+    logger.info(f'Grafana user: {settings.grafana_user}')
+    logger.info(f'Grafana password: {settings.grafana_password}')
+    logger.info(f'Grafana token: {settings.grafana_token}')
