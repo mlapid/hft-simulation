@@ -1,0 +1,5 @@
+# Testing
+
+```
+uv run pytest
+```
