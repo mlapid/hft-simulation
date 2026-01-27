@@ -19,9 +19,43 @@ This project uses open data from the [Deribit websocket](https://docs.deribit.co
 
 In particular, data on [Limit Order Book](https://en.wikipedia.org/wiki/Central_limit_order_book) is used - [API link](https://docs.deribit.com/?python#public-get_order_book_by_instrument_id).
 
-Redis Streams are used for communication between services.
+## Services
 
-Visualization of events takes place in Grafana.
+There are 3 main services:
+- Exchange Connector
+- Processing Engine
+- Execution Engine
+
+### Exchange Connector
+
+Responsible for:
+1. Getting market data from an exchange.
+2. Normalising the data schema.
+3. Saving data in MongoDB.
+4. Sending data to Redis for the Processing Engine.
+5. Visualising the status in Grafana.
+
+### Processing Engine
+
+### Execution Engine
+
+# Usage
+
+```bash
+docker compose up
+```
+
+## Testing
+
+```bash
+uv run pytest
+```
+
+## Type Checking
+
+```bash
+uv run ty check
+```
 
 # Roadmap
 

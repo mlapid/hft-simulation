@@ -1,4 +1,10 @@
 .env
+*.pyc
+py.typed
+.DS_Store
 
+notebooks/
+data/
 .venv/
+.pytest_cache/
 pycache/
