@@ -15,7 +15,7 @@ dependencies = [
 common = { path = "../../libs/common", editable = true }
 
 [project.scripts]
-exchange-connector = "exchange_connector:main"
+exchange-connector = "exchange_connector.main:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -26,5 +26,6 @@ packages = ["src/exchange_connector"]
 
 [dependency-groups]
 dev = [
-    "pytest>=8.4.1",
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",    
 ]

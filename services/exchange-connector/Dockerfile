@@ -19,10 +19,12 @@ COPY libs/common/pyproject.toml \
      /app/libs/common/
 
 COPY libs/common/src /app/libs/common/src
+COPY libs/common/tests /app/libs/common/tests
 COPY services/exchange-connector/src /app/services/exchange-connector/src
+COPY services/exchange-connector/entrypoint.sh /app/services/exchange-connector/entrypoint.sh
 
 WORKDIR /app/services/exchange-connector
 
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen
 
-ENTRYPOINT ["uv", "run", "exchange-connector"]
+ENTRYPOINT ["bash", "entrypoint.sh"]
