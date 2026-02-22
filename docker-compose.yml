@@ -1,39 +1,48 @@
-services:
-  # grafana:
-  #   build:
-  #     context: .
-  #     dockerfile: infra/grafana/Dockerfile
-  #   volumes:
-  #     - grafana_secrets:/run/secrets
-  #   ports:
-  #     - ${GRAFANA_PORT}:${GRAFANA_PORT}
-  #   environment:
-  #     - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
-  #     - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
-  #     - GF_SERVER_HTTP_PORT=${GRAFANA_PORT}
-  #   healthcheck:
-  #     test: ["CMD", "sh", "-c", "test -f /run/secrets/grafana_token && test -s /run/secrets/grafana_token"]
-  #     # test -f /run/secrets/grafana_token - Check if the file exists
-  #     # test -s /run/secrets/grafana_token - Check if the file is not empty
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
-  #     start_period: 5s
+secrets:
+  grafana_user:
+    file: ./secrets/grafana_user.txt
+  grafana_password:
+    file: ./secrets/grafana_password.txt
 
-  redis:
+services:
+  grafana:
     build:
       context: .
-      dockerfile: /infra/redis/Dockerfile
-    env_file:
-      - .env
+      dockerfile: infra/grafana/Dockerfile
     ports:
-      - ${REDIS_PORT}:${REDIS_PORT}
+      - ${GRAFANA_PORT}:${GRAFANA_PORT}
+    environment:
+      - GF_SECURITY_ADMIN_USER__FILE=/run/secrets/grafana_user
+      - GF_SECURITY_ADMIN_PASSWORD__FILE=/run/secrets/grafana_password
+      - GF_SERVER_HTTP_PORT=${GRAFANA_PORT}
+    secrets:
+      - grafana_user
+      - grafana_password
+    volumes:
+      - grafana_secrets:/run/shared
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "sh", "-c", "test -f /run/shared/grafana_token && test -s /run/shared/grafana_token"]
+      # test -f /run/shared/grafana_token - Check if the file exists
+      # test -s /run/shared/grafana_token - Check if the file is not empty
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 5s
+
+  # redis:
+  #   build:
+  #     context: .
+  #     dockerfile: /infra/redis/Dockerfile
+  #   ports:
+  #     - ${REDIS_PORT}:${REDIS_PORT}
+  #   env_file:
+  #     - .env
+  #   healthcheck:
+  #     test: [ "CMD", "redis-cli", "ping" ]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 3
+  #     start_period: 5s
 
   # exchange-connector:
   #   build:
@@ -47,7 +56,7 @@ services:
   #     redis:
   #       condition: service_healthy
   #   # volumes:
-  #   #   - grafana_secrets:/run/secrets
+  #   #   - grafana_secrets:/run/shared
 
-# volumes:
-#   grafana_secrets:
+volumes:
+  grafana_secrets:

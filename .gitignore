@@ -8,3 +8,5 @@ data/
 .venv/
 .pytest_cache/
 pycache/
+
+secrets/

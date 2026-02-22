@@ -6,6 +6,9 @@ echo "🚀 Starting Grafana..."
 /run.sh &
 GRAFANA_PID=$!
 
+GF_SECURITY_ADMIN_USER=$(cat /run/secrets/grafana_user | tr -d '\n')
+GF_SECURITY_ADMIN_PASSWORD=$(cat /run/secrets/grafana_password | tr -d '\n')
+
 # Wait for Grafana to become healthy
 echo "⏳ Waiting for Grafana to be ready..."
 until curl -s -u "$GF_SECURITY_ADMIN_USER:$GF_SECURITY_ADMIN_PASSWORD" http://localhost:${GF_SERVER_HTTP_PORT}/api/health | jq -e '.database == "ok"' > /dev/null; do
@@ -29,7 +32,7 @@ echo "Service Account ID: $SA_ID"
 echo "🔑 Creating token..."
 TOKEN_JSON=$(curl -s -X POST http://${GF_SECURITY_ADMIN_USER}:${GF_SECURITY_ADMIN_PASSWORD}@localhost:${GF_SERVER_HTTP_PORT}/api/serviceaccounts/$SA_ID/tokens \
   -H "Content-Type: application/json" \
-  -d '{"name": "dev-token", "secondsToLive": 86400}')
+  -d '{"name": "dev-token", "secondsToLive": 0}')
 
 echo "Token Response: $TOKEN_JSON"
 
@@ -37,8 +40,8 @@ TOKEN=$(echo "$TOKEN_JSON" | jq -r '.key')
 echo "Extracted Token: $TOKEN"
 
 # Save token to a shared volume location
-echo -n "$TOKEN" > /run/secrets/grafana_token
-echo "✅ Token written to /run/secrets/grafana_token"
+echo -n "$TOKEN" > /run/shared/grafana_token
+echo "✅ Token written to /run/shared/grafana_token"
 
 echo "🎉 Grafana initialization complete!"
 
