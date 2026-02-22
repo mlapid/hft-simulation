@@ -29,34 +29,35 @@ services:
       retries: 3
       start_period: 5s
 
-  # redis:
-  #   build:
-  #     context: .
-  #     dockerfile: /infra/redis/Dockerfile
-  #   ports:
-  #     - ${REDIS_PORT}:${REDIS_PORT}
-  #   env_file:
-  #     - .env
-  #   healthcheck:
-  #     test: [ "CMD", "redis-cli", "ping" ]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 3
-  #     start_period: 5s
+  redis:
+    build:
+      context: .
+      dockerfile: infra/redis/Dockerfile
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
-  # exchange-connector:
-  #   build:
-  #     context: .
-  #     dockerfile: services/exchange-connector/Dockerfile
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     # grafana:
-  #     #   condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #   # volumes:
-  #   #   - grafana_secrets:/run/shared
+  exchange-connector:
+    build:
+      context: .
+      dockerfile: services/exchange-connector/Dockerfile
+    env_file:
+      - .env
+    secrets:
+      - grafana_user
+      - grafana_password
+    volumes:
+      - grafana_secrets:/run/shared
+    depends_on:
+      grafana:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   grafana_secrets:

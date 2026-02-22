@@ -10,8 +10,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[4]
 class Settings(BaseSettings):
     grafana_host: str = Field(default='localhost', validation_alias='GRAFANA_HOST')
     grafana_port: int = Field(default=3000, validation_alias='GRAFANA_PORT')
-    grafana_user: str = Field(default='root', validation_alias='GRAFANA_USER')
-    grafana_password: str = Field(default='root', validation_alias='GRAFANA_PASSWORD')
+    grafana_user: str = Field(validation_alias='GRAFANA_USER')
+    grafana_password: str = Field(validation_alias='GRAFANA_PASSWORD')
     grafana_token: str = Field(default='', validation_alias='grafana_token')
 
     redis_host: str = Field(default='localhost', validation_alias='REDIS_HOST')
@@ -20,6 +20,6 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=PROJECT_ROOT / '.env',
-        secrets_dir='/run/secrets',
+        secrets_dir=['/run/secrets', '/run/shared'],
         extra='ignore'
     )
