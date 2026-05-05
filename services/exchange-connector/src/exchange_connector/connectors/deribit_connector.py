@@ -1,11 +1,13 @@
 import json
 import time
+import uuid
 from typing import Self, Any, ClassVar, AsyncGenerator
 
 from loguru import logger
-
 from websockets.exceptions import InvalidHandshake, ConnectionClosed
 import websockets.asyncio.client as websockets_client
+
+from exchange_connector.connector_message import ConnectorMessage
 
 
 class DeribitConnector:
@@ -13,24 +15,27 @@ class DeribitConnector:
     Deribit connector for getting market data from the exchange.
     '''
 
-    URI: ClassVar[str] = "wss://www.deribit.com/ws/api/v2"
-    URI_TEST: ClassVar[str] = "wss://test.deribit.com/ws/api/v2"
+    URI: ClassVar[str] = 'wss://www.deribit.com/ws/api/v2'
+    URI_TEST: ClassVar[str] = 'wss://test.deribit.com/ws/api/v2'
 
     def __init__(self):
         self._websocket_client: websockets_client.ClientConnection | None = None
 
-        self._client_send: float = 0.0
-        self._server_recv: float = 0.0
-        self._server_send: float = 0.0
-        self._client_recv: float = 0.0
-        self.offset: float = 0.0
+        self.session_id: str = str(uuid.uuid4())
+
+        self._client_send: int = 0 # in microseconds
+        self._server_recv: int = 0 # in microseconds
+        self._server_send: int = 0 # in microseconds
+        self._client_recv: int = 0 # in microseconds
+        self.offset: int = 0 # in microseconds
 
     def __str__(self):
 
         if self._websocket_client:
             return f'{self.__class__.__name__}(' \
                 f'remote={self._websocket_client.remote_address}, ' \
-                f'id={self._websocket_client.id})'
+                f'id={self._websocket_client.id}, ' \
+                f'session_id={self.session_id})'
 
         return f'{self.__class__.__name__}(disconnected)'
 
@@ -135,25 +140,25 @@ class DeribitConnector:
 
         logger.info(f'{self} set heartbeat interval to {interval} seconds.')
 
-    async def receive(self) -> AsyncGenerator[dict, None]:
+    async def receive(self) -> AsyncGenerator[ConnectorMessage, None]:
         '''
         Receive a message from the WebSocket client.
         '''
 
         async for raw_message in self._websocket_client:
-            self._client_recv = time.time()
+            self._client_recv = int(time.time_ns() / 1e3)
             message: dict = json.loads(raw_message)
 
             if message.get('id') == 8192:
-                self._server_recv = message.get('usIn', 0) / 1e6
-                self._server_send = message.get('usOut', 0) / 1e6
-                self.offset = ((self._server_recv - self._client_send) + (self._server_send - self._client_recv)) / 2
+                self._server_recv = message.get('usIn', 0)
+                self._server_send = message.get('usOut', 0)
+                self.offset = int(((self._server_recv - self._client_send) + (self._server_send - self._client_recv)) / 2)
                 logger.debug(f'Offset recalculated: {self.offset}')
                 continue
 
             if message.get('method') == 'heartbeat':
                 if message.get('params', {}).get('type') == 'test_request':
-                    self._client_send = time.time()
+                    self._client_send = int(time.time_ns() / 1e3)
                     await self._websocket_client.send(json.dumps({
                         "jsonrpc": "2.0",
                         "id": 8192,
@@ -166,9 +171,10 @@ class DeribitConnector:
                 params: dict = message.get('params', {})
                 data: dict = params.get('data', {})
                 
-                yield {
-                    'channel': params.get('channel', ''),
-                    'data': data,
-                    'timestamp': self._client_recv,
-                    'offset': self.offset
-                }
+                yield ConnectorMessage(
+                    session_id=self.session_id,
+                    channel=params.get('channel', ''),
+                    data=data,
+                    recv_timestamp=self._client_recv,
+                    offset=self.offset
+                )
