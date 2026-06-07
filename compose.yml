@@ -1,4 +1,7 @@
 networks:
+  frontend:
+    external: true
+    name: pi-infra_frontend
   backend:
     external: true
     name: pi-infra_backend
@@ -16,5 +19,6 @@ services:
     env_file:
       - .env
     networks:
+      - frontend
       - backend
     restart: unless-stopped
