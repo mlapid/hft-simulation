@@ -77,5 +77,11 @@ class OrderBook(BaseModel):
         return self.best_ask[0] - self.best_bid[0]
 
     @property
-    def volume_imbalance(self) -> float:
+    def queue_imbalance(self) -> float:
         return (self.best_bid[1] - self.best_ask[1]) / (self.best_bid[1] + self.best_ask[1])
+
+    @property
+    def depth_imbalance(self) -> float:
+        bid_volume = sum([volume for volume in self.bids.values()])
+        ask_volume = sum([volume for volume in self.asks.values()])
+        return (bid_volume - ask_volume) / (bid_volume + ask_volume)

@@ -8,12 +8,14 @@ class RedisProducer(RedisClient):
     Redis producer for sending data to a stream.
     '''
 
+    MAX_STREAM_LENGTH: int = 10000
+
     async def disconnect(self) -> None:
         '''
         Flush the stream and close the connection.
         '''
 
-        await self.flush_stream()
+        # await self.flush_stream()
 
         await self._close_connection()
 
@@ -25,9 +27,13 @@ class RedisProducer(RedisClient):
         if not self._redis_client:
             raise ConnectionError(f'{self} is not connected.')
 
-        await self._redis_client.xadd(name=self.stream_name, fields={
-            'message': message
-        })
+        await self._redis_client.xadd(
+            name=self.stream_name, 
+            fields={'message': message},
+            maxlen=self.MAX_STREAM_LENGTH,
+            approximate=False
+        )
+
         self.stream_length = await self._get_stream_length()
         logger.info(f'{self} sent message: {message}')
 

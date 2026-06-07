@@ -25,6 +25,6 @@ COPY services/exchange-connector/entrypoint.sh /app/services/exchange-connector/
 
 WORKDIR /app/services/exchange-connector
 
-RUN uv sync --frozen
+RUN uv sync --frozen --no-dev
 
 ENTRYPOINT ["bash", "entrypoint.sh"]

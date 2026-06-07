@@ -1,7 +1,8 @@
 from typing import Self, Any
 
-import websockets.asyncio.client as websockets_client
 from loguru import logger
+import websockets.asyncio.client as websockets_client
+from websockets.exceptions import InvalidHandshake, ConnectionClosed
 
 from common.settings import Settings
 
@@ -16,7 +17,7 @@ class GrafanaClient:
     def __init__(self, stream_name: str):
         self.stream_name: str = stream_name
 
-        self._websocket: websockets_client.ClientConnection | None
+        self._websocket: websockets_client.ClientConnection | None = None
 
     def __str__(self) -> str:
         return f'{self.__class__.__name__}(' \
@@ -61,15 +62,15 @@ class GrafanaClient:
                     'Authorization': f'Bearer {settings.grafana_token}'
                 }
             )
-        except Exception as e:
+        except (OSError, TimeoutError, InvalidHandshake) as e:
             raise ConnectionError(f'Failed to connect to Grafana WebSocket: {e}')
-        else:
-            logger.info(f'{instance} is connected to {stream_name}.')
-            return instance
+
+        logger.info(f'{instance} is connected to {stream_name}')
+        return instance
 
     async def disconnect(self) -> None:
         if not self._websocket:
-            raise ConnectionError(f'{self} is not connected.')
+            return
 
         await self._websocket.close()
         self._websocket = None
@@ -98,4 +99,7 @@ class GrafanaClient:
 
         metric: str = f'{channel_name},stream={self.stream_name} {data_str} {timestamp}'
 
-        await self._websocket.send(metric.encode('utf-8'))
+        try:
+            await self._websocket.send(metric.encode('utf-8'))
+        except ConnectionClosed as e:
+            raise ConnectionError(f'{self} connection closed while sending metric: {e}') from e

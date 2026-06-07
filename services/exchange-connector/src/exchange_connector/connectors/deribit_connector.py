@@ -29,6 +29,8 @@ class DeribitConnector:
         self._client_recv: int = 0 # in microseconds
         self.offset: int = 0 # in microseconds
 
+        self._last_heartbeat_recv: int = int(time.time_ns() / 1e3) # in microseconds
+
     def __str__(self):
 
         if self._websocket_client:
@@ -41,6 +43,16 @@ class DeribitConnector:
 
     def __repr__(self):
         return self.__str__()
+
+    @property
+    def heartbeat_age(self) -> int:
+        '''
+        Get the age of the heartbeat in microseconds.
+        '''
+
+        now_microseconds: int = int(time.time_ns() / 1e3)
+
+        return now_microseconds - self._last_heartbeat_recv
 
     async def __aenter__(self) -> Self:
         '''
@@ -157,6 +169,8 @@ class DeribitConnector:
                 continue
 
             if message.get('method') == 'heartbeat':
+                self._last_heartbeat_recv = self._client_recv
+
                 if message.get('params', {}).get('type') == 'test_request':
                     self._client_send = int(time.time_ns() / 1e3)
                     await self._websocket_client.send(json.dumps({
@@ -175,6 +189,7 @@ class DeribitConnector:
                     session_id=self.session_id,
                     channel=params.get('channel', ''),
                     data=data,
-                    recv_timestamp=self._client_recv,
-                    offset=self.offset
+                    timestamp=int(self._client_recv / 1e3),
+                    offset=int(self.offset / 1e3),
+                    heartbeat_age=int(self.heartbeat_age / 1e3)
                 )

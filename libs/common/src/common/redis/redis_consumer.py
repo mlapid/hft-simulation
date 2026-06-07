@@ -30,7 +30,9 @@ class RedisConsumer(RedisClient):
             raise ConnectionError(f'{self} is not connected.')
 
         message: list = await self._redis_client.xread(
-            streams={self.stream_name: self.last_message_id},
+            streams={
+                self.stream_name: self.last_message_id
+            },
             count=1,
             block=0
         )
