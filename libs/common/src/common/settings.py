@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     redis_stream_max_length: int = Field(default=1000, validation_alias='REDIS_STREAM_MAX_LENGTH')
 
     model_config = SettingsConfigDict(
-        env_file=PROJECT_ROOT / '.env.local',
+        env_file=PROJECT_ROOT / '.env',
         # secrets_dir=['/run/secrets', '/run/shared'],
         extra='ignore'
     )
