@@ -9,14 +9,15 @@ authors = [
 requires-python = ">=3.14"
 dependencies = [
     "fastapi>=0.139.2",
+    "hft-messaging>=0.1.0",
     "hft-observability>=0.1.0",
     "httpx>=0.28.1",
-    "redis>=8.0.1",
     "uvicorn>=0.51.0",
     "websockets>=16.1.1",
 ]
 
 [tool.uv.sources]
+hft-messaging = { workspace = true }
 hft-observability = { workspace = true }
 
 [project.scripts]

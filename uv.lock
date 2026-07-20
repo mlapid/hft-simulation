@@ -5,6 +5,7 @@ requires-python = ">=3.14"
 [manifest]
 members = [
     "execution-engine",
+    "hft-messaging",
     "hft-observability",
     "market-connector",
     "monitoring-service",
@@ -110,6 +111,17 @@ wheels = [
 ]
 
 [[package]]
+name = "hft-messaging"
+version = "0.1.0"
+source = { editable = "libs/hft-messaging" }
+dependencies = [
+    { name = "redis" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "redis", specifier = ">=8.0.1" }]
+
+[[package]]
 name = "hft-observability"
 version = "0.1.0"
 source = { editable = "libs/hft-observability" }
@@ -185,9 +197,9 @@ version = "0.1.0"
 source = { editable = "services/market-connector" }
 dependencies = [
     { name = "fastapi" },
+    { name = "hft-messaging" },
     { name = "hft-observability" },
     { name = "httpx" },
-    { name = "redis" },
     { name = "uvicorn" },
     { name = "websockets" },
 ]
@@ -195,9 +207,9 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi", specifier = ">=0.139.2" },
+    { name = "hft-messaging", editable = "libs/hft-messaging" },
     { name = "hft-observability", editable = "libs/hft-observability" },
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "redis", specifier = ">=8.0.1" },
     { name = "uvicorn", specifier = ">=0.51.0" },
     { name = "websockets", specifier = ">=16.1.1" },
 ]
