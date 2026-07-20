@@ -8,7 +8,12 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
+    "fastapi>=0.139.2",
     "hft-observability>=0.1.0",
+    "httpx>=0.28.1",
+    "redis>=8.0.1",
+    "uvicorn>=0.51.0",
+    "websockets>=16.1.1",
 ]
 
 [tool.uv.sources]
@@ -16,6 +21,9 @@ hft-observability = { workspace = true }
 
 [project.scripts]
 market-connector = "market_connector:main"
+market-connector-api = "market_connector.app.serve:main"
+deribit-book = "market_connector.examples.deribit_book:main"
+deribit-multi-book = "market_connector.examples.deribit_multi_book:main"
 
 [build-system]
 requires = ["uv_build>=0.8.19,<0.9.0"]

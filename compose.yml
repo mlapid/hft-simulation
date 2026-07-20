@@ -8,9 +8,10 @@ networks:
 
 services:
   market-connector:
+    container_name: market-connector
     build:
       context: .
-      dockerfile: services/market-connector/Dockerfile
+      dockerfile: Dockerfile
     logging:
       driver: json-file
       options:
