@@ -1,5 +1,5 @@
 [project]
-name = "monitoring-service"
+name = "hft-observability"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -7,10 +7,9 @@ authors = [
     { name = "mlapid", email = "marcus.lapid@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
-
-[project.scripts]
-monitoring-service = "monitoring_service:main"
+dependencies = [
+    "loguru>=0.7.3",
+]
 
 [build-system]
 requires = ["uv_build>=0.8.19,<0.9.0"]

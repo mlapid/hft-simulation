@@ -1,5 +1,5 @@
 [project]
-name = "monitoring-service"
+name = "market-connector"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -7,10 +7,15 @@ authors = [
     { name = "mlapid", email = "marcus.lapid@gmail.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "hft-observability>=0.1.0",
+]
+
+[tool.uv.sources]
+hft-observability = { workspace = true }
 
 [project.scripts]
-monitoring-service = "monitoring_service:main"
+market-connector = "market_connector:main"
 
 [build-system]
 requires = ["uv_build>=0.8.19,<0.9.0"]

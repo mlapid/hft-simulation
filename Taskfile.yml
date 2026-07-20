@@ -1,0 +1,25 @@
+version: "3"
+
+tasks:
+  sync:
+    cmds:
+      - uv sync
+
+  lint:
+    cmds:
+      - uv run ruff check
+
+  typecheck:
+    cmds:
+      - uv run ty check
+
+  test:
+    cmds:
+      - uv run pytest
+
+  check:
+    cmds:
+      - task sync
+      - task lint
+      - task typecheck
+      - task test

@@ -4,10 +4,12 @@
 py.typed
 .DS_Store
 
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+dist/
+
 notebooks/
 data/
-.venv/
-.pytest_cache/
-pycache/
-
 secrets/

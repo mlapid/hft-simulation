@@ -7,10 +7,10 @@ networks:
     name: pi-infra_backend
 
 services:
-  exchange-connector:
+  market-connector:
     build:
       context: .
-      dockerfile: services/exchange-connector/Dockerfile
+      dockerfile: services/market-connector/Dockerfile
     logging:
       driver: json-file
       options:

@@ -1,6 +1,18 @@
 [tool.uv.workspace]
-members = [
-  "libs/common",
-  "services/exchange-connector",
-  "services/monitoring-service",
+members = ["libs/*", "services/*"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.15.22",
+    "ty>=0.0.61",
 ]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.pytest.ini_options]
+addopts = ["--import-mode=importlib"]
+asyncio_mode = "auto"
+testpaths = ["services/*/tests"]
